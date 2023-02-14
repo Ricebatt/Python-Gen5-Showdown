@@ -566,10 +566,11 @@ def redrawWindow(win, myTeam, oppTeam, button1, button2, button3, button4):
     myActive(activeMon)
     oppActive(oppActiveMon)
 
-    button1.draw(win)
-    button2.draw(win)
-    button3.draw(win)
-    button4.draw(win)
+    if not activeMon.fainted:
+        button1.draw(win)
+        button2.draw(win)
+        button3.draw(win)
+        button4.draw(win)
 
     if mainBox.text != "":
         mainBox.draw(win)

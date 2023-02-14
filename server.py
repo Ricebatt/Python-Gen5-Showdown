@@ -1,8 +1,6 @@
 import socket
-#import pygame
 from _thread import *
 from pokemon import *
-#import sys
 
 port = 5555
 
@@ -304,39 +302,55 @@ def burnMulti(mon):
 
 readyForNextTurn = True
 
-def mon1Move(teamOneActive, movesList, teamTwoActive):
+def monMove(monNum):
+    oppMonNum = -1
+    if monNum == 0:
+        oppMonNum = 1
+    elif monNum == 1:
+        oppMonNum = 0
 
-    if movesList[0] > 4:
-        messageList[0] += teamLists[0][0].nick + " switched out for " + teamLists[0][movesList[0] - 4].nick + "!\n"
-        print(messageList[0])
-        tempPokemon[0] = teamLists[0][movesList[0] - 4]
-        teamLists[0][movesList[0] - 4] = teamLists[0][0]
-        teamLists[0][0] = tempPokemon[0]
+    if moves[monNum] > 4:
+        messageList[0] += teamLists[monNum][0].nick + " switched out for " + teamLists[monNum][moves[monNum] - 4].nick + "!\n"
+        #print(messageList[0])
+        tempPokemon[monNum] = teamLists[monNum][moves[monNum] - 4]
+        teamLists[monNum][moves[monNum] - 4] = teamLists[monNum][0]
+        teamLists[monNum][0] = tempPokemon[monNum]
 
         return
-    teamOneMove = teamOneActive.getMove(movesList[0])
+
+    teamOneMove = teamLists[monNum][0].getMove(moves[monNum])
     move1Temp = teamOneMove.replace(" ", "")
     move1Temp.replace("-", "")
     move1func = getattr(Pokemon, move1Temp)
-    move1String = move1func(teamOneActive).split("/")
+    move1String = move1func(teamLists[monNum][0]).split("/")
     # "Prio/Type/statusPhysicalSpecial/pp/power/Acc/atkChange/defChange/spaChange/spdChange/speChange/accChange/evaChange/atkChangeOpp/defChangeOpp/spaChangeOpp/spdChangeOpp/speChangeOpp/accChangeOpp/evaChangeOpp/StatusSelf/StatusOpp/extraEffect/Contact/Charging/Recharge/protected/reflectable/snatchable/mirrorMove/punch/sound/noGrav/Defrosts/Heals/ignSub/powder/Jaw/pulse/ballistic/mental/Dance"
     power1 = float(move1String[4])
 
+    pp = 0
+    if moves[monNum] == 1:
+        pp = teamLists[monNum][0].move1currentPP
+    if moves[monNum] == 1:
+        pp = teamLists[monNum][0].move2currentPP
+    if moves[monNum] == 1:
+        pp = teamLists[monNum][0].move3currentPP
+    if moves[monNum] == 1:
+        pp = teamLists[monNum][0].move4currentPP
+
     moveType1 = move1String[1]
-    level1 = teamOneActive.level
+    level1 = teamLists[monNum][0].level
     # stab1 = 1.0
-    attack1 = teamOneActive.startAtk * regStageMulti(teamOneActive.atkStage) * choiceBandMulti(teamOneActive)
-    defense2 = teamTwoActive.startDef * regStageMulti(teamTwoActive.defStage)
-    spattack1 = teamOneActive.startSpA * regStageMulti(teamOneActive.spaStage) * choiceSpecsMulti(teamOneActive)
-    spdefense2 = teamTwoActive.startSpD * regStageMulti(teamTwoActive.spdStage)
+    attack1 = teamLists[monNum][0].startAtk * regStageMulti(teamLists[monNum][0].atkStage) * choiceBandMulti(teamLists[monNum][0])
+    defense2 = teamLists[oppMonNum][0].startDef * regStageMulti(teamLists[oppMonNum][0].defStage)
+    spattack1 = teamLists[monNum][0].startSpA * regStageMulti(teamLists[monNum][0].spaStage) * choiceSpecsMulti(teamLists[monNum][0])
+    spdefense2 = teamLists[oppMonNum][0].startSpD * regStageMulti(teamLists[oppMonNum][0].spdStage)
     critical1 = 1
     superEffective = 1
-    if random.randint(1, int(critStageMulti(teamOneActive.critStage))) == 1:
+    if random.randint(1, int(critStageMulti(teamLists[monNum][0].critStage))) == 1:
         critical1 = 2
-        attack1 *= unlowerAtkStage(teamOneActive.atkStage)
-        defense2 *= unlowerDefStage(teamTwoActive.defStage)
-        spattack1 *= unlowerAtkStage(teamOneActive.spaStage)
-        spdefense2 *= unlowerDefStage(teamTwoActive.spdStage)
+        attack1 *= unlowerAtkStage(teamLists[monNum][0].atkStage)
+        defense2 *= unlowerDefStage(teamLists[oppMonNum][0].defStage)
+        spattack1 *= unlowerAtkStage(teamLists[monNum][0].spaStage)
+        spdefense2 *= unlowerDefStage(teamLists[oppMonNum][0].spdStage)
 
     weather1 = 1
     # fix weather multi
@@ -353,25 +367,25 @@ def mon1Move(teamOneActive, movesList, teamTwoActive):
         print(str(defense2))
         print(str(weather1))
         print(str(critical1))
-        print(str(stab(moveType1, teamOneActive)))
+        print(str(stab(moveType1, teamLists[0][0])))
 
-        print(str(getWeaknessMulti(moveType1, teamTwoActive)))
-        print(str(burnMulti(teamOneActive)))
+        print(str(getWeaknessMulti(moveType1, teamLists[1][0])))
+        print(str(burnMulti(teamLists[0][0])))
         '''
-        superEffective = getWeaknessMulti(moveType1, teamTwoActive)
+        superEffective = getWeaknessMulti(moveType1, teamLists[oppMonNum][0])
         damage1 = ((((((2 * level1) / 5) + 2) * power1 + (attack1 / defense2)) / 50) + 2) * weather1 * critical1 * \
-                  (float(random.randint(85, 100)) / 100.0) * stab(moveType1, teamOneActive) * superEffective * \
-                  burnMulti(teamOneActive)
+                  (float(random.randint(85, 100)) / 100.0) * stab(moveType1, teamLists[monNum][0]) * superEffective * \
+                  burnMulti(teamLists[monNum][0])
         damage1 = int(damage1)
 
         # print(str(damage1))
-        # print(str(teamTwoActive.currentHP))
-        newHP1 = teamTwoActive.currentHP - damage1
-        messageList[0] += teamOneActive.nick + " used " + teamOneActive.getMove(movesList[0]) + "! (-" + str(int(100 * damage1 / teamTwoActive.startHP)) + "%)"
+        # print(str(teamLists[1][0].currentHP))
+        newHP1 = teamLists[oppMonNum][0].currentHP - damage1
+        messageList[0] += teamLists[monNum][0].nick + " used " + teamLists[monNum][0].getMove(moves[monNum]) + "! (-" + str(int(100 * damage1 / teamLists[oppMonNum][0].startHP)) + "%)"
         if superEffective > 1:
             messageList[0] += "\nIt was super effective!"
         elif superEffective == 0:
-            messageList[0] += "\nIt doesnt effect " + teamTwoActive.nick + "..."
+            messageList[0] += "\nIt doesnt effect " + teamLists[oppMonNum][0].nick + "..."
         elif superEffective < 1:
             messageList[0] += "\nIt wasn't very effective..."
         if critical1 > 1:
@@ -379,23 +393,23 @@ def mon1Move(teamOneActive, movesList, teamTwoActive):
         messageList[0] += "\n"
         if newHP1 <= 0:
             newHP1 = 0
-            teamTwoActive.setFainted(True)
-            messageList[0] += teamTwoActive.nick + " Fainted!\n"
+            teamLists[oppMonNum][0].setFainted(True)
+            messageList[0] += teamLists[oppMonNum][0].nick + " Fainted!\n"
         # print(newHP1)
-        teamTwoActive.setCurrentHP(newHP1)
+        teamLists[oppMonNum][0].setCurrentHP(newHP1)
         print("team two takes physical damage")
 
     if move1String[2] == "Special":
-        superEffective = getWeaknessMulti(moveType1, teamTwoActive)
+        superEffective = getWeaknessMulti(moveType1, teamLists[oppMonNum][0])
         damage1 = ((((((2 * level1) / 5) + 2) * power1 + (spattack1 / spdefense2)) / 50) + 2) * weather1 * critical1 * \
-                  (float(random.randint(85, 100)) / 100.0) * stab(moveType1, teamOneActive) * superEffective
+                  (float(random.randint(85, 100)) / 100.0) * stab(moveType1, teamLists[monNum][0]) * superEffective
         damage1 = int(damage1)
-        newHP1 = teamTwoActive.currentHP - damage1
-        messageList[0] += teamOneActive.nick + " used " + teamOneActive.getMove(movesList[0]) + "! (-" + str(int(100 * damage1 / teamTwoActive.startHP)) + "%)"
+        newHP1 = teamLists[oppMonNum][0].currentHP - damage1
+        messageList[0] += teamLists[monNum][0].nick + " used " + teamLists[monNum][0].getMove(moves[monNum]) + "! (-" + str(int(100 * damage1 / teamLists[oppMonNum][0].startHP)) + "%)"
         if superEffective > 1:
             messageList[0] += "\nIt was super effective!"
         elif superEffective == 0:
-            messageList[0] += "\nIt doesnt effect " + teamTwoActive.nick + "..."
+            messageList[0] += "\nIt doesnt effect " + teamLists[oppMonNum][0].nick + "..."
         elif superEffective < 1:
             messageList[0] += "\nIt wasn't very effective..."
         if critical1 > 1:
@@ -403,9 +417,9 @@ def mon1Move(teamOneActive, movesList, teamTwoActive):
         messageList[0] += "\n"
         if newHP1 <= 0:
             newHP1 = 0
-            teamTwoActive.setFainted(True)
-            messageList[0] += teamTwoActive.nick + " Fainted!\n"
-        teamTwoActive.setCurrentHP(newHP1)
+            teamLists[oppMonNum][0].setFainted(True)
+            messageList[0] += teamLists[oppMonNum][0].nick + " Fainted!\n"
+        teamLists[oppMonNum][0].setCurrentHP(newHP1)
         print("team two takes special damage")
 
     if move1String[2] == "Status":
@@ -416,239 +430,81 @@ def mon1Move(teamOneActive, movesList, teamTwoActive):
     #stat changes
     for i in range(6, 22):
         if i == 6:
-            teamOneActive.changeStage(1, move1String[i])
+            teamLists[0][0].changeStage(1, move1String[i])
         if i == 7:
-            teamOneActive.changeStage(2, move1String[i])
+            teamLists[0][0].changeStage(2, move1String[i])
         if i == 8:
-            teamOneActive.changeStage(3, move1String[i])
+            teamLists[0][0].changeStage(3, move1String[i])
         if i == 9:
-            teamOneActive.changeStage(4, move1String[i])
+            teamLists[0][0].changeStage(4, move1String[i])
         if i == 10:
-            teamOneActive.changeStage(5, move1String[i])
+            teamLists[0][0].changeStage(5, move1String[i])
         if i == 11:
-            teamOneActive.changeStage(6, move1String[i])
+            teamLists[0][0].changeStage(6, move1String[i])
         if i == 12:
-            teamOneActive.changeStage(7, move1String[i])
+            teamLists[0][0].changeStage(7, move1String[i])
         if i == 13:
-            teamOneActive.changeStage(8, move1String[i])
+            teamLists[0][0].changeStage(8, move1String[i])
         if i == 14:
-            teamTwoActive.changeStage(1, move1String[i])
+            teamLists[1][0].changeStage(1, move1String[i])
         if i == 15:
-            teamTwoActive.changeStage(2, move1String[i])
+            teamLists[1][0].changeStage(2, move1String[i])
         if i == 16:
-            teamTwoActive.changeStage(3, move1String[i])
+            teamLists[1][0].changeStage(3, move1String[i])
         if i == 17:
-            teamTwoActive.changeStage(4, move1String[i])
+            teamLists[1][0].changeStage(4, move1String[i])
         if i == 18:
-            teamTwoActive.changeStage(5, move1String[i])
+            teamLists[1][0].changeStage(5, move1String[i])
         if i == 19:
-            teamTwoActive.changeStage(6, move1String[i])
+            teamLists[1][0].changeStage(6, move1String[i])
         if i == 20:
-            teamTwoActive.changeStage(7, move1String[i])
+            teamLists[1][0].changeStage(7, move1String[i])
         if i == 21:
-            teamTwoActive.changeStage(8, move1String[i])
+            teamLists[1][0].changeStage(8, move1String[i])
 
 
 
     if move1String[22] != "-":
         if move1String[22] == "BURNED" or move1String[22] == "TOXIC" or move1String[22] == "POISIONED" or move1String[22] == "FROZEN" or move1String[22] == "PARALYZED":
-            if teamOneActive.status == "BURNED" or teamOneActive.status == "TOXIC" or teamOneActive.status == "POISIONED" or teamOneActive.status == "FROZEN" or teamOneActive.status == "PARALYZED":
+            if teamLists[0][0].status == "BURNED" or teamLists[0][0].status == "TOXIC" or teamLists[0][0].status == "POISIONED" or teamLists[0][0].status == "FROZEN" or teamLists[0][0].status == "PARALYZED":
                 #code for display failure
                 pass
             else:
-                teamOneActive.setStatus(move1String[22])
+                teamLists[0][0].setStatus(move1String[22])
 
     if move1String[23] != "-":
         if move1String[23] == "BURNED" or move1String[23] == "TOXIC" or move1String[23] == "POISIONED" or \
                 move1String[23] == "FROZEN" or move1String[23] == "PARALYZED":
-            if teamTwoActive.status == "BURNED" or teamTwoActive.status == "TOXIC" or teamTwoActive.status == "POISIONED" or teamTwoActive.status == "FROZEN" or teamTwoActive.status == "PARALYZED":
+            if teamLists[1][0].status == "BURNED" or teamLists[1][0].status == "TOXIC" or teamLists[1][0].status == "POISIONED" or teamLists[1][0].status == "FROZEN" or teamLists[1][0].status == "PARALYZED":
                 # code for display failure (cant status statused target)
                 pass
             else:
-                teamTwoActive.setStatus(move1String[22])
+                teamLists[1][0].setStatus(move1String[22])
     '''
+
+    if moves[monNum] == 1:
+        teamLists[monNum][0].setCurrentPP1(pp - 1)
+    if moves[monNum] == 1:
+        teamLists[monNum][0].setCurrentPP2(pp - 1)
+    if moves[monNum] == 1:
+        teamLists[monNum][0].setCurrentPP3(pp - 1)
+    if moves[monNum] == 1:
+        teamLists[monNum][0].setCurrentPP4(pp - 1)
+
     print(messageList[0])
     # CODE A DELAY AND A DISPLAY HERE!
     #pygame.time.delay(2000)
 
-def mon2Move(teamOneActive, movesList, teamTwoActive):
 
-    if movesList[1] > 4:
-        messageList[0] += teamLists[1][0].nick + " switched out for " + teamLists[1][movesList[1] - 4].nick + "!\n"
-        print(messageList[0])
-        tempPokemon[1] = teamLists[1][movesList[1] - 4]
-        teamLists[1][movesList[1] - 4] = teamLists[1][0]
-        teamLists[1][0] = tempPokemon[1]
-        return
-
-    teamTwoMove = teamTwoActive.getMove(movesList[1])
-    #print("here")
-
-    move2temp = teamTwoMove.replace(" ", "")
-    move2temp.replace("-", "")
-    print(move2temp)
-    move2func = getattr(Pokemon, move2temp)
-    move2String = move2func(teamTwoActive).split("/")
-    # "Prio/Type/statusPhysicalSpecial/pp/power/Acc/atkChange/defChange/spaChange/spdChange/speChange/accChange/evaChange/atkChangeOpp/defChangeOpp/spaChangeOpp/spdChangeOpp/speChangeOpp/accChangeOpp/evaChangeOpp/StatusSelf/StatusOpp/extraEffect/Contact/Charging/Recharge/protected/reflectable/snatchable/mirrorMove/punch/sound/noGrav/Defrosts/Heals/ignSub/powder/Jaw/pulse/ballistic/mental/Dance"
-    power2 = float(move2String[4])
-    moveType2 = move2String[1]
-    level2 = teamTwoActive.level
-    # stab2 = 1.0
-    attack2 = teamTwoActive.startAtk * regStageMulti(teamTwoActive.atkStage) * choiceBandMulti(teamTwoActive)
-    defense1 = teamOneActive.startDef * regStageMulti(teamOneActive.defStage)
-    spattack2 = teamTwoActive.startSpA * regStageMulti(teamTwoActive.spaStage) * choiceSpecsMulti(teamTwoActive)
-    spdefense1 = teamOneActive.startSpD * regStageMulti(teamOneActive.spdStage)
-    critical2 = 1
-    superEffective = 1
-
-    if random.randint(1, int(critStageMulti(teamTwoActive.critStage))) == 1:
-        critical2 = 2
-        attack2 *= unlowerAtkStage(teamTwoActive.atkStage)
-        defense1 *= unlowerDefStage(teamOneActive.defStage)
-        spattack2 *= unlowerAtkStage(teamTwoActive.spaStage)
-        spdefense1 *= unlowerDefStage(teamOneActive.spdStage)
-
-    weather2 = 1
-    # fix weather multi
-
-    # miss checks needed
-
-    # damage calc pokemon1
-    if move2String[2] == "Physical":
-        '''
-        print(str(level2))
-        print(str(power2))
-        print(str(attack2))
-        print(str(defense1))
-        print(str(weather2))
-        print(str(critical2))
-        print(str(stab(moveType2, teamTwoActive)))
-
-        print(str(getWeaknessMulti(moveType1, teamTwoActive)))
-        print(str(burnMulti(teamOneActive)))
-        '''
-        superEffective = getWeaknessMulti(moveType2, teamOneActive)
-        damage2 = ((((((2 * level2) / 5) + 2) * power2 + (attack2 / defense1)) / 50) + 2) * weather2 * critical2 * \
-                  (float(random.randint(85, 100)) / 100.0) * stab(moveType2, teamTwoActive) * superEffective * \
-                  burnMulti(teamTwoActive)
-        damage2 = int(damage2)
-        newHP2 = teamOneActive.currentHP - damage2
-        messageList[0] += teamTwoActive.nick + " used " + teamTwoActive.getMove(movesList[1]) + "! (-" + str(int(100 * damage2 / teamOneActive.startHP)) + "%)"
-        if superEffective > 1:
-            messageList[0] += "\nIt was super effective!"
-        elif superEffective == 0:
-            messageList[0] += "\nIt doesnt effect " + teamOneActive.nick + "..."
-        elif superEffective < 1:
-            messageList[0] += "\nIt wasn't very effective..."
-        if critical2 > 1:
-            messageList[0] += "\nCritical Hit!"
-        messageList[0] += "\n"
-        if newHP2 <= 0:
-            newHP2 = 0
-            teamOneActive.setFainted(True)
-            messageList[0] += teamOneActive.nick + " Fainted!\n"
-        teamOneActive.setCurrentHP(newHP2)
-        print("team one takes physical damage")
-
-    if move2String[2] == "Special":
-        superEffective = getWeaknessMulti(moveType2, teamOneActive)
-        damage2 = ((((((2 * level2) / 5) + 2) * power2 + (
-                spattack2 / spdefense1)) / 50) + 2) * weather2 * critical2 * \
-                  (float(random.randint(85, 100)) / 100.0) * stab(moveType2, teamTwoActive) * superEffective
-        newHP2 = teamOneActive.currentHP - damage2
-        messageList[0] += teamTwoActive.nick + " used " + teamTwoActive.getMove(movesList[1]) + "! (-" + str(
-            int(100 * damage2 / teamOneActive.startHP)) + "%)"
-        if superEffective > 1:
-            messageList[0] += "\nIt was super effective!"
-        elif superEffective == 0:
-            messageList[0] += "\nIt doesnt effect " + teamOneActive.nick + "..."
-        elif superEffective < 1:
-            messageList[0] += "\nIt wasn't very effective..."
-        if critical2 > 1:
-            messageList[0] += "\nCritical Hit!"
-        messageList[0] += "\n"
-        if newHP2 <= 0:
-            newHP2 = 0
-            teamOneActive.setFainted(True)
-            messageList[0] += teamOneActive.nick + " Fainted!\n"
-        teamOneActive.setCurrentHP(newHP2)
-        print("team one takes special damage")
-
-    if move2String[2] == "Status":
-        pass
-
-    # "Prio/Type/statusPhysicalSpecial/pp/power/Acc/atkChange/defChange/spaChange/spdChange/speChange/accChange/evaChange/critChange/atkChangeOpp/defChangeOpp/spaChangeOpp/spdChangeOpp/speChangeOpp/accChangeOpp/evaChangeOpp/critChangeOpp/StatusSelf/StatusOpp/extraEffect/Contact/Charging/Recharge/protected/reflectable/snatchable/mirrorMove/punch/sound/noGrav/Defrosts/Heals/ignSub/powder/Jaw/pulse/ballistic/mental/Dance"
-
-    # stat changes
-    '''
-    for i in range(6, 22):
-        if i == 6:
-            teamTwoActive.changeStage(1, move2String[i])
-        if i == 7:
-            teamTwoActive.changeStage(2, move2String[i])
-        if i == 8:
-            teamTwoActive.changeStage(3, move2String[i])
-        if i == 9:
-            teamTwoActive.changeStage(4, move2String[i])
-        if i == 10:
-            teamTwoActive.changeStage(5, move2String[i])
-        if i == 11:
-            teamTwoActive.changeStage(6, move2String[i])
-        if i == 12:
-            teamTwoActive.changeStage(7, move2String[i])
-        if i == 13:
-            teamTwoActive.changeStage(8, move2String[i])
-        if i == 14:
-            teamOneActive.changeStage(1, move2String[i])
-        if i == 15:
-            teamOneActive.changeStage(2, move2String[i])
-        if i == 16:
-            teamOneActive.changeStage(3, move2String[i])
-        if i == 17:
-            teamOneActive.changeStage(4, move2String[i])
-        if i == 18:
-            teamOneActive.changeStage(5, move2String[i])
-        if i == 19:
-            teamOneActive.changeStage(6, move2String[i])
-        if i == 20:
-            teamOneActive.changeStage(7, move2String[i])
-        if i == 21:
-            teamOneActive.changeStage(8, move2String[i])
-
-    if move2String[22] != "-":
-        if move2String[22] == "BURNED" or move2String[22] == "TOXIC" or move2String[22] == "POISIONED" or \
-                move2String[22] == "FROZEN" or move2String[22] == "PARALYZED":
-            if teamTwoActive.status == "BURNED" or teamTwoActive.status == "TOXIC" or teamTwoActive.status == "POISIONED" or teamTwoActive.status == "FROZEN" or teamTwoActive.status == "PARALYZED":
-                # code for display failure
-                pass
-            else:
-                teamTwoActive.setStatus(move2String[22])
-
-    if move2String[23] != "-":
-        if move2String[23] == "BURNED" or move2String[23] == "TOXIC" or move2String[23] == "POISIONED" or \
-                move2String[23] == "FROZEN" or move2String[23] == "PARALYZED":
-            if teamOneActive.status == "BURNED" or teamOneActive.status == "TOXIC" or teamOneActive.status == "POISIONED" or teamOneActive.status == "FROZEN" or teamOneActive.status == "PARALYZED":
-                # code for display failure
-                pass
-            else:
-                teamOneActive.setStatus(move2String[22])
-
-    '''
-    # CODE A DELAY AND A DISPLAY HERE!
-    #pygame.time.delay(2000)
-    print(messageList[0])
-
-def turn(movesList, playerNum):
+def turn(playerNum):
     if playerNum == 1:
         return
 
     messageList[0] = ""
-    teamOneActive = teamLists[0][0]
-    teamTwoActive = teamLists[1][0]
 
-    if teamOneActive.fainted and movesList[0] < 5:
+    if teamLists[0][0].fainted and moves[0] < 5:
         return
-    if teamTwoActive.fainted and movesList[1] < 5:
+    if teamLists[1][0].fainted and moves[1] < 5:
         return
 
     teamOneMovePrio = 0
@@ -656,14 +512,14 @@ def turn(movesList, playerNum):
     teamOneGoFirst = False
     teamTwoGoFirst = False
     #set priority for order of moves
-    if movesList[0] > 4:
+    if moves[0] > 4:
         teamOneMovePrio = 6
     else:
-        teamOneMovePrio = teamOneActive.getMovePrio(movesList[0])
-    if movesList[1] > 4:
+        teamOneMovePrio = teamLists[0][0].getMovePrio(moves[0])
+    if moves[1] > 4:
         teamTwoMovePrio = 6
     else:
-        teamTwoMovePrio = teamTwoActive.getMovePrio(movesList[1])
+        teamTwoMovePrio = teamLists[1][0].getMovePrio(moves[1])
     #pursuit
     #code will go here
 
@@ -673,8 +529,8 @@ def turn(movesList, playerNum):
         teamTwoGoFirst = True
     else:
         #same priority, go to speed check
-        teamOneCurrentSpe = teamOneActive.startSpe * regStageMulti(teamOneActive.speStage) * paralyzeMulti(teamOneActive) * choiceScarfMulti(teamOneActive)
-        teamTwoCurrentSpe = teamTwoActive.startSpe * regStageMulti(teamTwoActive.speStage) * paralyzeMulti(teamTwoActive) * choiceScarfMulti(teamTwoActive)
+        teamOneCurrentSpe = teamLists[0][0].startSpe * regStageMulti(teamLists[0][0].speStage) * paralyzeMulti(teamLists[0][0]) * choiceScarfMulti(teamLists[0][0])
+        teamTwoCurrentSpe = teamLists[1][0].startSpe * regStageMulti(teamLists[1][0].speStage) * paralyzeMulti(teamLists[1][0]) * choiceScarfMulti(teamLists[1][0])
         if teamTwoCurrentSpe > teamOneCurrentSpe:
             teamTwoGoFirst = True
         elif teamOneCurrentSpe > teamTwoCurrentSpe:
@@ -688,6 +544,18 @@ def turn(movesList, playerNum):
 
     readyForNextTurn = False
 
+    #if a pokemon is fainted
+    if teamLists[0][0].fainted and teamLists[1][0].fainted:
+        monMove(0)
+        monMove(1)
+        return
+    elif teamLists[0][0].fainted:
+        monMove(0)
+        return
+    elif teamLists[1][0].fainted:
+        monMove(1)
+        return
+
     if teamOneGoFirst:
         print("team one will go first")
     elif teamTwoGoFirst:
@@ -698,35 +566,35 @@ def turn(movesList, playerNum):
 
     if teamOneGoFirst:
         #first mon move
-        '''if movesList[0] < 5:
-            displayText += teamOneActive.nick + " used " + teamOneActive.getMove(movesList[0]) + "!\n"
+        '''if moves[0] < 5:
+            displayText += teamLists[0][0].nick + " used " + teamLists[0][0].getMove(moves[0]) + "!\n"
         else:
-            displayText += teamOneActive.nick + " switched out to " + teamLists[0][movesList[movesList[0] - 4]].nick + "!\n"'''
-        mon1Move(teamOneActive, movesList, teamTwoActive)
+            displayText += teamLists[0][0].nick + " switched out to " + teamLists[0][moves[moves[0] - 4]].nick + "!\n"'''
+        #mon1Move()
 
-        teamOneActive = teamLists[0][0]
-        teamTwoActive = teamLists[1][0]
+
+
+        monMove(0)
 
         #second mon move
-        #displayText += teamTwoActive.nick + " used " + teamTwoActive.getMove(movesList[1]) + "!\n"
-        mon2Move(teamOneActive, movesList, teamTwoActive)
+        #displayText += teamLists[1][0].nick + " used " + teamLists[1][0].getMove(moves[1]) + "!\n"
+        #mon2Move()
+        monMove(1)
 
     elif teamTwoGoFirst:
         # second mon move
-        '''if movesList[0] < 5:
-            displayText += teamTwoActive.nick + " used " + teamTwoActive.getMove(movesList[1]) + "!\n"
+        '''if moves[0] < 5:
+            displayText += teamLists[1][0].nick + " used " + teamLists[1][0].getMove(moves[1]) + "!\n"
         else:
-            displayText += teamTwoActive.nick + " switched out to " + teamLists[1][movesList[movesList[1] - 4]].nick + "!\n"'''
+            displayText += teamLists[1][0].nick + " switched out to " + teamLists[1][moves[moves[1] - 4]].nick + "!\n"'''
 
-        mon2Move(teamOneActive, movesList, teamTwoActive)
-
-        teamOneActive = teamLists[0][0]
-        teamTwoActive = teamLists[1][0]
+        #mon2Move()
+        monMove(1)
 
         #first mon move
-        #displayText += teamOneActive.nick + " used " + teamOneActive.getMove(movesList[0]) + "!\n"
-        mon1Move(teamOneActive, movesList, teamTwoActive)
-
+        #displayText += teamLists[0][0].nick + " used " + teamLists[0][0].getMove(moves[0]) + "!\n"
+        #mon1Move()
+        monMove(0)
 
     #if team
     #print(teamsStringCombine(teamString(teamLists[0]), teamString(teamLists[1])))
@@ -734,11 +602,11 @@ def turn(movesList, playerNum):
     #add all end of turn effects here
     '''
     if playerNum == 0:
-        teamLists[0][0] = teamOneActive
-        teamLists[1][0] = teamTwoActive
+        teamLists[0][0] = teamLists[0][0]
+        teamLists[1][0] = teamLists[1][0]
     else:
-        teamLists2[0][0] = teamOneActive
-        teamLists2[1][0] = teamTwoActive
+        teamLists2[0][0] = teamLists[0][0]
+        teamLists2[1][0] = teamLists[1][0]
     '''
 
     #print(teamsStringCombine(teamString(teamLists[0]), teamString(teamLists[1])))
@@ -792,7 +660,7 @@ def threaded_client(conn, playerNum):
 
             if moves[0] != -1 and moves[1] != -1 and readyForNextTurn:
 
-                turn(moves, playerNum)
+                turn(playerNum)
                 #print("ready for turn")
 
 
