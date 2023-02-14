@@ -1,0 +1,9 @@
+Mew @ Choice Scarf
+Ability: Synchronize
+Shiny: Yes
+EVs: 252 Atk / 4 SpA / 252 Spe
+Hasty Nature
+- Baton Pass
+- Bulk Up
+- Ancient Power
+- Crunch

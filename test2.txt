@@ -1,0 +1,57 @@
+Nidoking (M)
+Ability: Poison Point
+EVs: 252 Atk / 4 SpD / 252 Spe
+Jolly Nature
+- Avalanche
+- Counter
+- Drill Run
+- Facade
+
+Gengar @ Leftovers
+Ability: Levitate
+EVs: 252 Atk / 4 SpD / 252 Spe
+Jolly Nature
+- Curse
+- Drain Punch
+- Facade
+- Destiny Bond
+
+Mew
+Ability: Synchronize
+Shiny: Yes
+EVs: 4 Atk / 252 SpA / 252 Spe
+Hasty Nature
+- Aura Sphere
+- Brick Break
+- Calm Mind
+- Dark Pulse
+
+Charizard
+Ability: Blaze
+Shiny: Yes
+EVs: 252 Atk / 4 SpD / 252 Spe
+Adamant Nature
+- Crunch
+- Dragon Dance
+- Earthquake
+- Dragon Tail
+
+Blastoise
+Ability: Torrent
+Shiny: Yes
+EVs: 252 HP / 252 Atk / 4 SpA
+Brave Nature
+- Avalanche
+- Brick Break
+- Earthquake
+- Flash Cannon
+
+Venusaur @ Choice Specs
+Ability: Overgrow
+Shiny: Yes
+EVs: 252 Atk / 4 SpD / 252 Spe
+Jolly Nature
+- Body Slam
+- Facade
+- Leech Seed
+- Double-Edge

@@ -1,0 +1,28 @@
+Ivysaur (M) @ Choice Scarf
+Ability: Overgrow
+EVs: 4 Atk / 252 SpA / 252 Spe
+Hasty Nature
+- Curse
+- Giga Drain
+- Leech Seed
+- Power Whip
+
+Mew @ Choice Band
+Ability: Synchronize
+EVs: 252 SpA / 4 SpD / 252 Spe
+Timid Nature
+IVs: 0 Atk
+- Ancient Power
+- Baton Pass
+- Bulk Up
+- Dark Pulse
+
+Gengar @ Choice Band
+Ability: Synchronize
+EVs: 252 SpA / 4 SpD / 252 Spe
+Timid Nature
+IVs: 0 Atk
+- Ancient Power
+- Baton Pass
+- Bulk Up
+- Dark Pulse
