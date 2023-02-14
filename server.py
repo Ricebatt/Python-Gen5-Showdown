@@ -8,7 +8,6 @@ port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-
 try:
     server = input("Enter your IPv4 (Can be found in your command prompt, type ipconfig): ")
 
@@ -167,16 +166,6 @@ messageList = [""]
 
 moves = [-1, -1]
 
-def sendBackData():
-
-
-    #print("this is sending to player 0")
-    reply = teamsStringCombine(teamString(teamLists[0]), teamString(teamLists[1]))
-    #print(reply)
-
-    conn.sendall(str.encode(reply))
-    return True
-
 def regStageMulti(stage):
     if stage == -6:
         return 0.25
@@ -314,7 +303,6 @@ def burnMulti(mon):
         return 1.0
 
 readyForNextTurn = True
-
 
 def mon1Move(teamOneActive, movesList, teamTwoActive):
 
@@ -481,7 +469,6 @@ def mon1Move(teamOneActive, movesList, teamTwoActive):
     '''
     print(messageList[0])
     # CODE A DELAY AND A DISPLAY HERE!
-    #sendBackData(playerNum)
     #pygame.time.delay(2000)
 
 def mon2Move(teamOneActive, movesList, teamTwoActive):
@@ -648,7 +635,6 @@ def mon2Move(teamOneActive, movesList, teamTwoActive):
 
     '''
     # CODE A DELAY AND A DISPLAY HERE!
-    #sendBackData(playerNum)
     #pygame.time.delay(2000)
     print(messageList[0])
 
@@ -758,7 +744,6 @@ def turn(movesList, playerNum):
     #print(teamsStringCombine(teamString(teamLists[0]), teamString(teamLists[1])))
 
     # CODE A DELAY AND A DISPLAY HERE!
-    #sendBackData(data, playerNum)
     #pygame.time.delay(2000)
 
 
