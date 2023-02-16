@@ -924,7 +924,10 @@ class Pokemon():
     Thrash
     Thunder
     Thunder Fang
-    Thunder Wave
+    '''
+    def ThunderWave(self):
+        return "0/ELECTRIC/Status/32/-/90/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/-/PARALYZED/-/0/0/0/1/1/0/1/0/0/0/0/0/0/0/0/0/0/0/0"
+    '''
     ThunderPunch
     ThunderShock
     Thunderbolt

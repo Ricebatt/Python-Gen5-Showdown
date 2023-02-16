@@ -227,7 +227,7 @@ def stab(type, mon):
     return 1.0
 
 def accEvaStageMulti(stage):
-    if stage == -6:
+    if stage <= -6:
         return 3.0 / 9.0
     elif stage == -5:
         return 3.0 / 8.0
@@ -251,7 +251,7 @@ def accEvaStageMulti(stage):
         return 7.0 / 3.0
     elif stage == 5:
         return 8.0 / 3.0
-    elif stage == 6:
+    elif stage >= 6:
         return 9.0 / 3.0
     return 0.0
 
@@ -356,7 +356,45 @@ def monMove(monNum):
     weather1 = 1
     # fix weather multi
 
-    # miss checks needed
+    #paralyze check
+    if teamLists[monNum][0].status == "PARALYZED":
+        messageList[0] += teamLists[monNum][0].nick + " is paralyzed...\n"
+        if random.randint(0,3) == 0:
+            messageList[0] += teamLists[monNum][0].nick + " is unable to move!\n"
+            return
+
+    #miss check
+    gravity = 1.0
+    tangledFeet = 1.0
+    hustle = 1.0
+    sandVeil = 1.0
+    snowCloak = 1.0
+    victoryStar = 1.0
+    compoundEyes = 1.0
+    brightPowder = 1.0
+    laxIncence = 1.0
+    wideLens = 1.0
+    zoomLens = 1.0
+
+    miracleBerry = 1.0
+
+    accModifier = gravity * tangledFeet * hustle * sandVeil * snowCloak * victoryStar * compoundEyes * brightPowder * laxIncence * wideLens * zoomLens
+
+    moveAcc = -1
+    try:
+        moveAcc = int(move1String[5])
+    except:
+        pass
+
+    totalAccEvaStage = teamLists[monNum][0].accStage - teamLists[oppMonNum][0].evaStage
+
+    if moveAcc != -1:
+        moddedAcc = moveAcc * accModifier * accEvaStageMulti(totalAccEvaStage) * miracleBerry
+        if random.randint(1,100) > moddedAcc:
+            messageList[0] += teamLists[monNum][0].nick + " used " + teamLists[monNum][0].getMove(moves[monNum]) + "!\n"
+            messageList[0] += teamLists[monNum][0].nick + " missed!\n"
+            return
+
 
     # damage calc pokemon1
     if move1String[2] == "Physical":
@@ -495,17 +533,18 @@ def monMove(monNum):
                 # code for display failure
                 messageList[0] += teamLists[oppMonNum][0].nick + " is already affected by a status condition! (" + teamLists[oppMonNum][0].status + ")\n"
             else:
-                teamLists[oppMonNum][0].setStatus(move1String[22])
+                teamLists[oppMonNum][0].setStatus(move1String[23])
                 messageList[0] += teamLists[oppMonNum][0].nick + " has been " + teamLists[oppMonNum][0].status + "!\n"
-
+    '''
     if moves[monNum] == 1:
         teamLists[monNum][0].setCurrentPP1(pp - 1)
-    if moves[monNum] == 1:
+    if moves[monNum] == 2:
         teamLists[monNum][0].setCurrentPP2(pp - 1)
-    if moves[monNum] == 1:
+    if moves[monNum] == 3:
         teamLists[monNum][0].setCurrentPP3(pp - 1)
-    if moves[monNum] == 1:
+    if moves[monNum] == 4:
         teamLists[monNum][0].setCurrentPP4(pp - 1)
+    '''
 
     print(messageList[0])
     # CODE A DELAY AND A DISPLAY HERE!
@@ -591,20 +630,6 @@ def turn(playerNum):
     #print(teamsStringCombine(teamString(teamLists[0]), teamString(teamLists[1])))
 
     #add all end of turn effects here
-    '''
-    if playerNum == 0:
-        teamLists[0][0] = teamLists[0][0]
-        teamLists[1][0] = teamLists[1][0]
-    else:
-        teamLists2[0][0] = teamLists[0][0]
-        teamLists2[1][0] = teamLists[1][0]
-    '''
-
-    #print(teamsStringCombine(teamString(teamLists[0]), teamString(teamLists[1])))
-
-    # CODE A DELAY AND A DISPLAY HERE!
-    #pygame.time.delay(2000)
-
 
 def threaded_client(conn, playerNum):
     conn.send(str.encode("player " + str(playerNum) + " connected"))
@@ -651,6 +676,24 @@ def threaded_client(conn, playerNum):
 
             if moves[0] != -1 and moves[1] != -1 and readyForNextTurn:
                 turn(playerNum)
+
+            if teamLists[0][0].status == "BURNED":
+                messageList[0] += teamLists[0][0].nick + "was hurt by its burn!\n"
+
+            if teamLists[1][0].status == "BURNED":
+                messageList[0] += teamLists[1][0].nick + "was hurt by its burn!\n"
+
+            if teamLists[0][0].status == "POISONED":
+                messageList[0] += teamLists[0][0].nick + "was hurt by its poison!\n"
+
+            if teamLists[1][0].status == "POISONED":
+                messageList[0] += teamLists[1][0].nick + "was hurt by its poison!\n"
+
+            if teamLists[0][0].status == "TOXIC":
+                messageList[0] += teamLists[0][0].nick + "was hurt by its poison!\n"
+
+            if teamLists[1][0].status == "TOXIC":
+                messageList[0] += teamLists[1][0].nick + "was hurt by its poison!\n"
 
             #if no info received from client, disconnect
             '''

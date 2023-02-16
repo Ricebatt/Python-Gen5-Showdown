@@ -882,10 +882,10 @@ def main():
 monOneStatus = StatusButton()
 monTwoStatus = StatusButton()
 
-monOneStatus.setX(100)
-monTwoStatus.setY(410)
+monOneStatus.setX(310)
+monOneStatus.setY(210)
 
-monOneStatus.setX(235)
+monTwoStatus.setX(240)
 monTwoStatus.setY(80)
 
 monStatuses = [monOneStatus, monTwoStatus]
