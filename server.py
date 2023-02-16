@@ -679,9 +679,19 @@ def threaded_client(conn, playerNum):
 
             if teamLists[0][0].status == "BURNED":
                 messageList[0] += teamLists[0][0].nick + "was hurt by its burn!\n"
+                teamLists[0][0].currentHP = teamLists[0][0].currentHP - (teamLists[0][0].startHP / 8)
+                if teamLists[0][0].currentHP <= 0:
+                    teamLists[0][0].currentHP = 0
+                    messageList[0] += teamLists[0][0].nick + " fainted!\n"
+                    teamLists[0][0].fainted = True
 
             if teamLists[1][0].status == "BURNED":
                 messageList[0] += teamLists[1][0].nick + "was hurt by its burn!\n"
+                teamLists[1][0].currentHP = teamLists[1][0].currentHP - (teamLists[1][0].startHP / 8)
+                if teamLists[1][0].currentHP <= 0:
+                    teamLists[1][0].currentHP = 0
+                    messageList[0] += teamLists[1][0].nick + " fainted!\n"
+                    teamLists[1][0].fainted = True
 
             if teamLists[0][0].status == "POISONED":
                 messageList[0] += teamLists[0][0].nick + "was hurt by its poison!\n"
