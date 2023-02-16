@@ -323,7 +323,7 @@ def monMove(monNum):
     try:
         power1 = float(move1String[4])
     except:
-        pass
+        power1 = 0
 
     if teamLists[monNum][0].fainted:
         return
@@ -480,24 +480,23 @@ def monMove(monNum):
 
         teamLists[oppMonNum][0].changeStage(i - 13, int(move1String[i]))
 
-    '''
     if move1String[22] != "-":
-        if move1String[22] == "BURNED" or move1String[22] == "TOXIC" or move1String[22] == "POISIONED" or move1String[22] == "FROZEN" or move1String[22] == "PARALYZED":
-            if teamLists[0][0].status == "BURNED" or teamLists[0][0].status == "TOXIC" or teamLists[0][0].status == "POISIONED" or teamLists[0][0].status == "FROZEN" or teamLists[0][0].status == "PARALYZED":
+        if move1String[22] == "BURNED" or move1String[22] == "TOXIC" or move1String[22] == "POISONED" or move1String[22] == "FROZEN" or move1String[22] == "PARALYZED" or move1String[22] == "ASLEEP":
+            if teamLists[monNum][0].status == "BURNED" or teamLists[monNum][0].status == "TOXIC" or teamLists[monNum][0].status == "POISONED" or teamLists[monNum][0].status == "FROZEN" or teamLists[monNum][0].status == "PARALYZED" or teamLists[monNum][0].status == "ASLEEP":
                 #code for display failure
-                pass
+                messageList[0] += teamLists[monNum][0].nick + " is already affected by a status condition! (" + teamLists[monNum][0].status + ")\n"
             else:
-                teamLists[0][0].setStatus(move1String[22])
+                teamLists[monNum][0].setStatus(move1String[22])
+                messageList[0] += teamLists[monNum][0].nick + " has been " + teamLists[monNum][0].status + "!\n"
 
     if move1String[23] != "-":
-        if move1String[23] == "BURNED" or move1String[23] == "TOXIC" or move1String[23] == "POISIONED" or \
-                move1String[23] == "FROZEN" or move1String[23] == "PARALYZED":
-            if teamLists[1][0].status == "BURNED" or teamLists[1][0].status == "TOXIC" or teamLists[1][0].status == "POISIONED" or teamLists[1][0].status == "FROZEN" or teamLists[1][0].status == "PARALYZED":
-                # code for display failure (cant status statused target)
-                pass
+        if move1String[23] == "BURNED" or move1String[23] == "TOXIC" or move1String[23] == "POISONED" or move1String[23] == "FROZEN" or move1String[23] == "PARALYZED" or move1String[23] == "ASLEEP":
+            if teamLists[oppMonNum][0].status == "BURNED" or teamLists[oppMonNum][0].status == "TOXIC" or teamLists[oppMonNum][0].status == "POISONED" or teamLists[oppMonNum][0].status == "FROZEN" or teamLists[oppMonNum][0].status == "PARALYZED" or teamLists[oppMonNum][0].status == "ASLEEP":
+                # code for display failure
+                messageList[0] += teamLists[oppMonNum][0].nick + " is already affected by a status condition! (" + teamLists[oppMonNum][0].status + ")\n"
             else:
-                teamLists[1][0].setStatus(move1String[22])
-    '''
+                teamLists[oppMonNum][0].setStatus(move1String[22])
+                messageList[0] += teamLists[oppMonNum][0].nick + " has been " + teamLists[oppMonNum][0].status + "!\n"
 
     if moves[monNum] == 1:
         teamLists[monNum][0].setCurrentPP1(pp - 1)
@@ -511,7 +510,6 @@ def monMove(monNum):
     print(messageList[0])
     # CODE A DELAY AND A DISPLAY HERE!
     #pygame.time.delay(2000)
-
 
 def turn(playerNum):
     if playerNum == 1:

@@ -16,6 +16,47 @@ clientNumber = 0
 
 #print(sys.path[0])
 
+class StatusButton:
+    def __init__(self):
+        self.text = ""
+        self.x = 0
+        self.y = 0
+        self.color = 0
+        self.width = 40
+        self.height = 20
+
+    def setX(self, newX):
+        self.x = newX
+
+    def setY(self, newY):
+        self.y = newY
+
+    def setStatus(self, status):
+        if status == "PARALYZED":
+            self.color = (255, 255, 0)
+            self.text = "PAR"
+        if status == "BURNED":
+            self.color = (255, 0, 0)
+            self.text = "BRN"
+        if status == "TOXIC":
+            self.color = (113, 1, 147)
+            self.text = "TOX"
+        if status == "POISONED":
+            self.color = (163, 44, 196)
+            self.text = "PSN"
+        if status == "FROZEN":
+            self.color = (0, 0, 147)
+            self.text = "FRZ"
+        if status == "ASLEEP":
+            self.color = (190, 190, 190)
+            self.text = "SLP"
+
+    def draw(self, win):
+        pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.height))
+        font = pygame.font.SysFont("calibri", 20)
+        text = font.render(self.text, True, (0,0,0))
+        win.blit(text, (self.x + round(self.width/2) - round(text.get_width()/2), self.y + round(self.height/2) - round(text.get_height()/2)))
+
 class textBox:
     def __init__(self):
         self.text = []
@@ -490,8 +531,6 @@ def makeTeam():
     f.close()
     readFile.close()
 
-
-
 def redrawWindow(win, myTeam, oppTeam, button1, button2, button3, button4):
     win.fill((255,255,255))
 
@@ -557,6 +596,14 @@ def redrawWindow(win, myTeam, oppTeam, button1, button2, button3, button4):
 
     oppTeamName.setText(oppName+ " (" + str(int(oppActiveMon.currentHP * 100 / oppActiveMon.startHP)) + "%)")
     oppTeamName.draw(win)
+
+    if activeMon.status != "None":
+        monStatuses[0].setStatus(activeMon.status)
+        monStatuses[0].draw(win)
+
+    if oppActiveMon.status != "None":
+        monStatuses[1].setStatus(oppActiveMon.status)
+        monStatuses[1].draw(win)
 
     button1.setColor(getColor(activeMon.move1Type()))
     button2.setColor(getColor(activeMon.move2Type()))
@@ -832,6 +879,16 @@ def main():
         except:
             pass
 
+monOneStatus = StatusButton()
+monTwoStatus = StatusButton()
+
+monOneStatus.setX(100)
+monTwoStatus.setY(410)
+
+monOneStatus.setX(235)
+monTwoStatus.setY(80)
+
+monStatuses = [monOneStatus, monTwoStatus]
 
 monmove1 = Button()
 monmove2 = Button()
