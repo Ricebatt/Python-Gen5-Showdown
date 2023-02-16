@@ -151,9 +151,6 @@ def getWeaknessMulti(type, enemy):
     if enemy.type2 == "NONE":
         defending2 = 17
 
-    print(typeMatrix[attacking][defending1])
-    print(typeMatrix[attacking][defending2])
-
     return typeMatrix[attacking][defending1] * typeMatrix[attacking][defending2]
 
 teamLists = [[pokemon1, pokemon1, pokemon1, pokemon1, pokemon1, pokemon1], [pokemon1, pokemon1, pokemon1, pokemon1, pokemon1, pokemon1]]
@@ -311,34 +308,38 @@ def monMove(monNum):
 
     if moves[monNum] > 4:
         messageList[0] += teamLists[monNum][0].nick + " switched out for " + teamLists[monNum][moves[monNum] - 4].nick + "!\n"
-        #print(messageList[0])
         tempPokemon[monNum] = teamLists[monNum][moves[monNum] - 4]
         teamLists[monNum][moves[monNum] - 4] = teamLists[monNum][0]
         teamLists[monNum][0] = tempPokemon[monNum]
-
         return
 
     teamOneMove = teamLists[monNum][0].getMove(moves[monNum])
-    move1Temp = teamOneMove.replace(" ", "")
-    move1Temp.replace("-", "")
-    move1func = getattr(Pokemon, move1Temp)
+    moveTemp = teamOneMove.replace(" ", "")
+    moveTemp.replace("-", "")
+    print(moveTemp)
+    move1func = getattr(Pokemon, moveTemp)
     move1String = move1func(teamLists[monNum][0]).split("/")
     # "Prio/Type/statusPhysicalSpecial/pp/power/Acc/atkChange/defChange/spaChange/spdChange/speChange/accChange/evaChange/atkChangeOpp/defChangeOpp/spaChangeOpp/spdChangeOpp/speChangeOpp/accChangeOpp/evaChangeOpp/StatusSelf/StatusOpp/extraEffect/Contact/Charging/Recharge/protected/reflectable/snatchable/mirrorMove/punch/sound/noGrav/Defrosts/Heals/ignSub/powder/Jaw/pulse/ballistic/mental/Dance"
-    power1 = float(move1String[4])
+    try:
+        power1 = float(move1String[4])
+    except:
+        pass
+
+    if teamLists[monNum][0].fainted:
+        return
 
     pp = 0
     if moves[monNum] == 1:
         pp = teamLists[monNum][0].move1currentPP
-    if moves[monNum] == 1:
+    if moves[monNum] == 2:
         pp = teamLists[monNum][0].move2currentPP
-    if moves[monNum] == 1:
+    if moves[monNum] == 3:
         pp = teamLists[monNum][0].move3currentPP
-    if moves[monNum] == 1:
+    if moves[monNum] == 4:
         pp = teamLists[monNum][0].move4currentPP
 
     moveType1 = move1String[1]
     level1 = teamLists[monNum][0].level
-    # stab1 = 1.0
     attack1 = teamLists[monNum][0].startAtk * regStageMulti(teamLists[monNum][0].atkStage) * choiceBandMulti(teamLists[monNum][0])
     defense2 = teamLists[oppMonNum][0].startDef * regStageMulti(teamLists[oppMonNum][0].defStage)
     spattack1 = teamLists[monNum][0].startSpA * regStageMulti(teamLists[monNum][0].spaStage) * choiceSpecsMulti(teamLists[monNum][0])
@@ -359,27 +360,12 @@ def monMove(monNum):
 
     # damage calc pokemon1
     if move1String[2] == "Physical":
-        #print("physical attack")
-        '''
-        print(str(level1))
-        print(str(power1))
-        print(str(attack1))
-        print(str(defense2))
-        print(str(weather1))
-        print(str(critical1))
-        print(str(stab(moveType1, teamLists[0][0])))
-
-        print(str(getWeaknessMulti(moveType1, teamLists[1][0])))
-        print(str(burnMulti(teamLists[0][0])))
-        '''
+        #print(attack1)
         superEffective = getWeaknessMulti(moveType1, teamLists[oppMonNum][0])
-        damage1 = ((((((2 * level1) / 5) + 2) * power1 + (attack1 / defense2)) / 50) + 2) * weather1 * critical1 * \
-                  (float(random.randint(85, 100)) / 100.0) * stab(moveType1, teamLists[monNum][0]) * superEffective * \
-                  burnMulti(teamLists[monNum][0])
+        damage1 = ((((((2 * level1) / 5) + 2) * power1 * (attack1 / defense2)) / 50) + 2) * weather1 * critical1 * (float(random.randint(85, 100)) / 100.0) * stab(moveType1, teamLists[monNum][0]) * superEffective * burnMulti(teamLists[monNum][0])
+        print(damage1)
         damage1 = int(damage1)
 
-        # print(str(damage1))
-        # print(str(teamLists[1][0].currentHP))
         newHP1 = teamLists[oppMonNum][0].currentHP - damage1
         messageList[0] += teamLists[monNum][0].nick + " used " + teamLists[monNum][0].getMove(moves[monNum]) + "! (-" + str(int(100 * damage1 / teamLists[oppMonNum][0].startHP)) + "%)"
         if superEffective > 1:
@@ -395,13 +381,12 @@ def monMove(monNum):
             newHP1 = 0
             teamLists[oppMonNum][0].setFainted(True)
             messageList[0] += teamLists[oppMonNum][0].nick + " Fainted!\n"
-        # print(newHP1)
+
         teamLists[oppMonNum][0].setCurrentHP(newHP1)
-        print("team two takes physical damage")
 
     if move1String[2] == "Special":
         superEffective = getWeaknessMulti(moveType1, teamLists[oppMonNum][0])
-        damage1 = ((((((2 * level1) / 5) + 2) * power1 + (spattack1 / spdefense2)) / 50) + 2) * weather1 * critical1 * \
+        damage1 = ((((((2 * level1) / 5) + 2) * power1 * (spattack1 / spdefense2)) / 50) + 2) * weather1 * critical1 * \
                   (float(random.randint(85, 100)) / 100.0) * stab(moveType1, teamLists[monNum][0]) * superEffective
         damage1 = int(damage1)
         newHP1 = teamLists[oppMonNum][0].currentHP - damage1
@@ -420,244 +405,80 @@ def monMove(monNum):
             teamLists[oppMonNum][0].setFainted(True)
             messageList[0] += teamLists[oppMonNum][0].nick + " Fainted!\n"
         teamLists[oppMonNum][0].setCurrentHP(newHP1)
-        print("team two takes special damage")
 
     if move1String[2] == "Status":
-        pass
+        messageList[0] += teamLists[monNum][0].nick + " used " + teamLists[monNum][0].getMove(moves[monNum]) + "!\n"
 
     # "Prio/Type/statusPhysicalSpecial/pp/power/Acc/atkChange/defChange/spaChange/spdChange/speChange/accChange/evaChange/critChange/atkChangeOpp/defChangeOpp/spaChangeOpp/spdChangeOpp/speChangeOpp/accChangeOpp/evaChangeOpp/critChangeOpp/StatusSelf/StatusOpp/extraEffect/Contact/Charging/Recharge/protected/reflectable/snatchable/mirrorMove/punch/sound/noGrav/Defrosts/Heals/ignSub/powder/Jaw/pulse/ballistic/mental/Dance"
 
-    '''
+    statString = ""
 
     #stat changes
-    for i in range(6, 22):
+    for i in range (6, 14):
         if i == 6:
-            teamLists[monNum][0].changeStage(1, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[monNum][0].nick + "'s Attack severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Attack harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Attack fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Attack rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Attack sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Attack rose drastically!\n"
+            statString = "Attack"
         if i == 7:
-            teamLists[monNum][0].changeStage(2, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[monNum][0].nick + "'s Defense severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Defense harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Defense fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Defense rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Defense sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Defense rose drastically!\n"
+            statString = "Defense"
         if i == 8:
-            teamLists[monNum][0].changeStage(3, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[monNum][0].nick + "'s Special Attack severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Special Attack harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Special Attack fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Special Attack rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Special Attack sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Special Attack rose drastically!\n"
+            statString = "Special Attack"
         if i == 9:
-            teamLists[monNum][0].changeStage(4, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[monNum][0].nick + "'s Special Defense severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Special Defense harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Special Defense fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Special Defense rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Special Defense sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Special Defense rose drastically!\n"
+            statString = "Special Defense"
         if i == 10:
-            teamLists[monNum][0].changeStage(5, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[monNum][0].nick + "'s Speed severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Speed harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Speed fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Speed rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Speed sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Speed rose drastically!\n"
+            statString = "Speed"
         if i == 11:
-            teamLists[monNum][0].changeStage(6, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[monNum][0].nick + "'s Accuracy severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Accuracy harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Accuracy fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Accuracy rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Accuracy sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Accuracy rose drastically!\n"
+            statString = "Accuracy"
         if i == 12:
-            teamLists[monNum][0].changeStage(7, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[monNum][0].nick + "'s Evasion severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Evasion harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Evasion fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Evasion rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Evasion sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Evasion rose drastically!\n"
+            statString = "Evasiveness"
         if i == 13:
-            teamLists[monNum][0].changeStage(8, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[monNum][0].nick + "'s Crit Rate severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Crit Rate harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Crit Rate fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Crit Rate rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[monNum][0].nick + "'s Crit Rate sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[monNum][0].nick + "'s Crit Rate rose drastically!\n"
+            statString = "Crit Rate"
+
+        if int(move1String[i]) <= -3:
+            messageList[0] += teamLists[monNum][0].nick + "'s " + statString + " severely fell!\n"
+        elif int(move1String[i]) == -2:
+            messageList[0] += teamLists[monNum][0].nick + "'s " + statString + " harshly fell!\n"
+        elif int(move1String[i]) == -1:
+            messageList[0] += teamLists[monNum][0].nick + "'s " + statString + " fell!\n"
+        elif int(move1String[i]) == 1:
+            messageList[0] += teamLists[monNum][0].nick + "'s " + statString + " rose!\n"
+        elif int(move1String[i]) == 2:
+            messageList[0] += teamLists[monNum][0].nick + "'s " + statString + " sharply rose!\n"
+        elif int(move1String[i]) == 3:
+            messageList[0] += teamLists[monNum][0].nick + "'s " + statString + " rose drastically!\n"
+
+        teamLists[monNum][0].changeStage(i - 5, int(move1String[i]))
+
+    for i in range (14, 22):
         if i == 14:
-            teamLists[oppMonNum][0].changeStage(1, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Attack severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Attack harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Attack fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Attack rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Attack sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Attack rose drastically!\n"
+            statString = "Attack"
         if i == 15:
-            teamLists[oppMonNum][0].changeStage(2, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Defense severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Defense harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Defense fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Defense rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Defense sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Defense rose drastically!\n"
+            statString = "Defense"
         if i == 16:
-            teamLists[oppMonNum][0].changeStage(3, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Special Attack severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Special Attack harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Special Attack fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Special Attack rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Special Attack sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Special Attack rose drastically!\n"
+            statString = "Special Attack"
         if i == 17:
-            teamLists[oppMonNum][0].changeStage(4, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Special Defense severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Special Defense harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Special Defense fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Special Defense rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Special Defense sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Special Defense rose drastically!\n"
+            statString = "Special Defense"
         if i == 18:
-            teamLists[oppMonNum][0].changeStage(5, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Speed severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Speed harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Speed fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Speed rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Speed sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Speed rose drastically!\n"
+            statString = "Speed"
         if i == 19:
-            teamLists[oppMonNum][0].changeStage(6, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Accuracy severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Accuracy harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Accuracy fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Accuracy rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Accuracy sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Accuracy rose drastically!\n"
+            statString = "Accuracy"
         if i == 20:
-            teamLists[oppMonNum][0].changeStage(7, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Evasion severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Evasion harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Evasion fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Evasion rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Evasion sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Evasion rose drastically!\n"
+            statString = "Evasiveness"
         if i == 21:
-            teamLists[oppMonNum][0].changeStage(8, int(move1String[i]))
-            if move1String[i] <= -3:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Crit Rate severely fell!\n"
-            elif move1String[i] == -2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Crit Rate harshly fell!\n"
-            elif move1String[i] == -1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Crit Rate fell!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Crit Rate rose!\n"
-            elif move1String[i] == 2:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Crit Rate sharply rose!\n"
-            elif move1String[i] == 1:
-                messageList[0] += teamLists[oppMonNum][0].nick + "'s Crit Rate rose drastically!\n"
-                
-                
-    '''
+            statString = "Crit Rate"
+
+        if int(move1String[i]) <= -3:
+            messageList[0] += teamLists[oppMonNum][0].nick + "'s " + statString + " severely fell!\n"
+        elif int(move1String[i]) == -2:
+            messageList[0] += teamLists[oppMonNum][0].nick + "'s " + statString + " harshly fell!\n"
+        elif int(move1String[i]) == -1:
+            messageList[0] += teamLists[oppMonNum][0].nick + "'s " + statString + " fell!\n"
+        elif int(move1String[i]) == 1:
+            messageList[0] += teamLists[oppMonNum][0].nick + "'s " + statString + " rose!\n"
+        elif int(move1String[i]) == 2:
+            messageList[0] += teamLists[oppMonNum][0].nick + "'s " + statString + " sharply rose!\n"
+        elif int(move1String[i]) == 3:
+            messageList[0] += teamLists[oppMonNum][0].nick + "'s " + statString + " rose drastically!\n"
+
+        teamLists[oppMonNum][0].changeStage(i - 13, int(move1String[i]))
 
     '''
     if move1String[22] != "-":
@@ -761,35 +582,11 @@ def turn(playerNum):
     damage2 = 0
 
     if teamOneGoFirst:
-        #first mon move
-        '''if moves[0] < 5:
-            displayText += teamLists[0][0].nick + " used " + teamLists[0][0].getMove(moves[0]) + "!\n"
-        else:
-            displayText += teamLists[0][0].nick + " switched out to " + teamLists[0][moves[moves[0] - 4]].nick + "!\n"'''
-        #mon1Move()
-
-
-
         monMove(0)
-
-        #second mon move
-        #displayText += teamLists[1][0].nick + " used " + teamLists[1][0].getMove(moves[1]) + "!\n"
-        #mon2Move()
         monMove(1)
 
     elif teamTwoGoFirst:
-        # second mon move
-        '''if moves[0] < 5:
-            displayText += teamLists[1][0].nick + " used " + teamLists[1][0].getMove(moves[1]) + "!\n"
-        else:
-            displayText += teamLists[1][0].nick + " switched out to " + teamLists[1][moves[moves[1] - 4]].nick + "!\n"'''
-
-        #mon2Move()
         monMove(1)
-
-        #first mon move
-        #displayText += teamLists[0][0].nick + " used " + teamLists[0][0].getMove(moves[0]) + "!\n"
-        #mon1Move()
         monMove(0)
 
     #if team
@@ -825,7 +622,7 @@ def threaded_client(conn, playerNum):
         pass
     '''
     reply = ""
-    #print("hello world")
+
     while True:
         try:
             #print("hello world")
@@ -855,10 +652,7 @@ def threaded_client(conn, playerNum):
             '''
 
             if moves[0] != -1 and moves[1] != -1 and readyForNextTurn:
-
                 turn(playerNum)
-                #print("ready for turn")
-
 
             #if no info received from client, disconnect
             '''
@@ -877,12 +671,8 @@ def threaded_client(conn, playerNum):
             elif playerNum == 1:
                 reply = teamsStringCombine(teamsStringCombine(teamString(teamLists[1]), teamString(teamLists[0])), messageList[0])
 
-                #print("Received: ", data)
-                #print("Sending : ", reply)
-
             conn.sendall(str.encode(reply))
 
-            #print("error before here?")
         except:
             print("error?")
             break
