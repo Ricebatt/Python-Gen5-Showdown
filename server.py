@@ -163,6 +163,7 @@ moves = [-1, -1]
 
 sleepCountRemember = [[0,0,0,0,0,0], [0,0,0,0,0,0]]
 sleepCount = [0, 0]
+tempSlpCount = 0
 
 toxicCount = [1, 1]
 
@@ -316,7 +317,23 @@ def monMove(monNum):
         tempPokemon[monNum] = teamLists[monNum][moves[monNum] - 4]
         teamLists[monNum][moves[monNum] - 4] = teamLists[monNum][0]
         teamLists[monNum][0] = tempPokemon[monNum]
+
+        #reset toxic count
+        toxicCount[monNum] = 1
+        #reset sleep count
+        tempSlpCount = sleepCountRemember[monNum][0]
+        sleepCountRemember[monNum][0] = sleepCountRemember[monNum][moves[monNum] - 4]
+        sleepCountRemember[monNum][moves[monNum] - 4] = tempSlpCount
         return
+
+    if teamLists[monNum][0].status == "ASLEEP":
+        if sleepCount[monNum] == 0:
+            messageList[0] += teamLists[monNum][0].nick + " woke up!"
+            teamLists[monNum][0].status = "None"
+        else:
+            messageList[0] += teamLists[monNum][0].nick + " is fast asleep..."
+            sleepCount[monNum] -= 1
+            return
 
     teamOneMove = teamLists[monNum][0].getMove(moves[monNum])
     moveTemp = teamOneMove.replace(" ", "")
@@ -530,7 +547,14 @@ def monMove(monNum):
                 messageList[0] += teamLists[monNum][0].nick + " is already affected by a status condition! (" + teamLists[monNum][0].status + ")\n"
             else:
                 teamLists[monNum][0].setStatus(move1String[22])
-                messageList[0] += teamLists[monNum][0].nick + " has been " + teamLists[monNum][0].status + "!\n"
+                if teamLists[monNum][0].status == "ASLEEP":
+                    sleepCount[monNum] = random.randint(1,3)
+                    sleepCountRemember[monNum][0] = sleepCount[monNum]
+                    messageList[0] += teamLists[monNum][0].nick + " fell asleep!\n"
+                elif teamLists[monNum][0].status == "TOXIC":
+                    messageList[0] += teamLists[monNum][0].nick + " has been badly poisoned!\n"
+                else:
+                    messageList[0] += teamLists[monNum][0].nick + " has been " + teamLists[monNum][0].status.lower() + "!\n"
 
     if move1String[23] != "-":
         if move1String[23] == "BURNED" or move1String[23] == "TOXIC" or move1String[23] == "POISONED" or move1String[23] == "FROZEN" or move1String[23] == "PARALYZED" or move1String[23] == "ASLEEP":
@@ -539,7 +563,15 @@ def monMove(monNum):
                 messageList[0] += teamLists[oppMonNum][0].nick + " is already affected by a status condition! (" + teamLists[oppMonNum][0].status + ")\n"
             else:
                 teamLists[oppMonNum][0].setStatus(move1String[23])
-                messageList[0] += teamLists[oppMonNum][0].nick + " has been " + teamLists[oppMonNum][0].status + "!\n"
+                if teamLists[oppMonNum][0].status == "ASLEEP":
+                    sleepCount[oppMonNum] = random.randint(1, 3)
+                    sleepCountRemember[oppMonNum][0] = sleepCount[oppMonNum]
+                    messageList[0] += teamLists[oppMonNum][0].nick + " fell asleep!\n"
+                elif teamLists[oppMonNum][0].status == "TOXIC":
+                    messageList[0] += teamLists[oppMonNum][0].nick + " has been badly poisoned!\n"
+                else:
+                    messageList[0] += teamLists[oppMonNum][0].nick + " has been " + teamLists[oppMonNum][0].status.lower() + "!\n"
+
     '''
     if moves[monNum] == 1:
         teamLists[monNum][0].setCurrentPP1(pp - 1)

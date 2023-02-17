@@ -7,7 +7,7 @@ Hasty Nature
 - Leech Seed
 - Power Whip
 
-Mew @ Choice Band
+Mewtwo @ Choice Band
 Ability: Synchronize
 EVs: 252 SpA / 4 SpD / 252 Spe
 Timid Nature
