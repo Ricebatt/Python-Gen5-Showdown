@@ -161,6 +161,11 @@ messageList = [""]
 
 moves = [-1, -1]
 
+sleepCountRemember = [[0,0,0,0,0,0], [0,0,0,0,0,0]]
+sleepCount = [0, 0]
+
+toxicCount = [1, 1]
+
 def regStageMulti(stage):
     if stage == -6:
         return 0.25
@@ -629,6 +634,62 @@ def turn(playerNum):
     #if team
     #print(teamsStringCombine(teamString(teamLists[0]), teamString(teamLists[1])))
 
+    if teamLists[0][0].status == "BURNED":
+        messageList[0] += teamLists[0][0].nick + "was hurt by its burn! (-" + str(
+            int((teamLists[0][0].startHP * 100 / 8) / teamLists[0][0].startHP)) + "%)\n"
+        teamLists[0][0].currentHP = teamLists[0][0].currentHP - (teamLists[0][0].startHP / 8)
+        if teamLists[0][0].currentHP <= 0:
+            teamLists[0][0].currentHP = 0
+            messageList[0] += teamLists[0][0].nick + " fainted!\n"
+            teamLists[0][0].fainted = True
+
+    if teamLists[1][0].status == "BURNED":
+        messageList[0] += teamLists[1][0].nick + "was hurt by its burn! (-" + str(
+            int((teamLists[1][0].startHP * 100 / 8) / teamLists[1][0].startHP)) + "%)\n"
+        teamLists[1][0].currentHP = teamLists[1][0].currentHP - (teamLists[1][0].startHP / 8)
+        if teamLists[1][0].currentHP <= 0:
+            teamLists[1][0].currentHP = 0
+            messageList[0] += teamLists[1][0].nick + " fainted!\n"
+            teamLists[1][0].fainted = True
+
+    if teamLists[0][0].status == "POISONED":
+        messageList[0] += teamLists[0][0].nick + "was hurt by its poison! (-" + str(
+            int((teamLists[0][0].startHP * 100 / 8) / teamLists[0][0].startHP)) + "%)\n"
+        teamLists[0][0].currentHP = teamLists[0][0].currentHP - (teamLists[0][0].startHP / 8)
+        if teamLists[0][0].currentHP <= 0:
+            teamLists[0][0].currentHP = 0
+            messageList[0] += teamLists[0][0].nick + " fainted!\n"
+            teamLists[0][0].fainted = True
+
+    if teamLists[1][0].status == "POISONED":
+        messageList[0] += teamLists[1][0].nick + "was hurt by its poison! (-" + str(
+            int((teamLists[1][0].startHP * 100 / 8) / teamLists[1][0].startHP)) + "%)\n"
+        teamLists[1][0].currentHP = teamLists[1][0].currentHP - (teamLists[1][0].startHP / 8)
+        if teamLists[1][0].currentHP <= 0:
+            teamLists[1][0].currentHP = 0
+            messageList[0] += teamLists[1][0].nick + " fainted!\n"
+            teamLists[1][0].fainted = True
+
+    if teamLists[0][0].status == "TOXIC":
+        messageList[0] += teamLists[0][0].nick + "was hurt by its poison! (-" + str(
+            int((teamLists[0][0].startHP * toxicCount[0] * 100 / 8) / teamLists[0][0].startHP)) + "%)\n"
+        teamLists[0][0].currentHP = teamLists[0][0].currentHP - (teamLists[0][0].startHP * toxicCount[0] / 16)
+        toxicCount[0] += 1
+        if teamLists[0][0].currentHP <= 0:
+            teamLists[0][0].currentHP = 0
+            messageList[0] += teamLists[0][0].nick + " fainted!\n"
+            teamLists[0][0].fainted = True
+
+    if teamLists[1][0].status == "TOXIC":
+        messageList[0] += teamLists[1][0].nick + "was hurt by its poison! (-" + str(
+            int((teamLists[1][0].startHP * toxicCount[1] * 100 / 8) / teamLists[1][0].startHP)) + "%)\n"
+        teamLists[1][0].currentHP = teamLists[1][0].currentHP - (teamLists[1][0].startHP * toxicCount[1] / 8)
+        toxicCount[0] += 1
+        if teamLists[1][0].currentHP <= 0:
+            teamLists[1][0].currentHP = 0
+            messageList[0] += teamLists[1][0].nick + " fainted!\n"
+            teamLists[1][0].fainted = True
+
     #add all end of turn effects here
 
 def threaded_client(conn, playerNum):
@@ -674,36 +735,8 @@ def threaded_client(conn, playerNum):
             
             '''
 
-            if moves[0] != -1 and moves[1] != -1 and readyForNextTurn:
+            if (moves[0] != -1 and moves[1] != -1 and readyForNextTurn) or (teamLists[0][0].fainted and not teamLists[1][0].fainted and moves[0] != -1) or (teamLists[1][0].fainted and not teamLists[0][0].fainted and moves[1] != -1):
                 turn(playerNum)
-
-            if teamLists[0][0].status == "BURNED":
-                messageList[0] += teamLists[0][0].nick + "was hurt by its burn!\n"
-                teamLists[0][0].currentHP = teamLists[0][0].currentHP - (teamLists[0][0].startHP / 8)
-                if teamLists[0][0].currentHP <= 0:
-                    teamLists[0][0].currentHP = 0
-                    messageList[0] += teamLists[0][0].nick + " fainted!\n"
-                    teamLists[0][0].fainted = True
-
-            if teamLists[1][0].status == "BURNED":
-                messageList[0] += teamLists[1][0].nick + "was hurt by its burn!\n"
-                teamLists[1][0].currentHP = teamLists[1][0].currentHP - (teamLists[1][0].startHP / 8)
-                if teamLists[1][0].currentHP <= 0:
-                    teamLists[1][0].currentHP = 0
-                    messageList[0] += teamLists[1][0].nick + " fainted!\n"
-                    teamLists[1][0].fainted = True
-
-            if teamLists[0][0].status == "POISONED":
-                messageList[0] += teamLists[0][0].nick + "was hurt by its poison!\n"
-
-            if teamLists[1][0].status == "POISONED":
-                messageList[0] += teamLists[1][0].nick + "was hurt by its poison!\n"
-
-            if teamLists[0][0].status == "TOXIC":
-                messageList[0] += teamLists[0][0].nick + "was hurt by its poison!\n"
-
-            if teamLists[1][0].status == "TOXIC":
-                messageList[0] += teamLists[1][0].nick + "was hurt by its poison!\n"
 
             #if no info received from client, disconnect
             '''
